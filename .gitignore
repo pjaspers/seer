@@ -1,3 +1,6 @@
 pkg
 doc
-Manifest
+Manifest/.DS_Store
+/lib/.DS_Store
+/lib/seer/.#line_chart.rb
+/.DS_Store

@@ -7,8 +7,9 @@ module Seer
   require 'seer/gauge'
   require 'seer/line_chart'
   require 'seer/pie_chart'
+  require 'seer/annotated_time_line_chart'
   
-  VISUALIZERS = [:area_chart, :bar_chart, :column_chart, :gauge, :line_chart, :pie_chart]
+  VISUALIZERS = [:area_chart, :bar_chart, :column_chart, :gauge,:annotated_time_line_chart, :line_chart, :pie_chart]
   
   def self.valid_hex_number?(val) #:nodoc:
     return false unless val.is_a?(String) && ! val.empty?
@@ -49,6 +50,10 @@ module Seer
 
   def self.line_chart(data, args)
     LineChart.render(data, args)
+  end
+
+  def self.annotated_time_line_chart(data, args)
+    AnnotatedTimeLineChart.render(data, args)
   end
 
   def self.pie_chart(data, args)
