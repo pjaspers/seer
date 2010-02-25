@@ -18,7 +18,7 @@ module Seer
   #         :as => :area_chart,
   #         :in_element => 'chart',
   #         :series => {
-  #           :series_label => 'name',
+  #     
   #           :data_label => 'date',
   #           :data_method => 'quantity',
   #           :data_series => @series
@@ -45,7 +45,7 @@ module Seer
     attr_accessor :allowHtml, :allowRedraw, :allowRedraw, :allValuesSuffix, :annotationsWidth, :colors, :dateFormat, :displayAnnotations, :displayAnnotationsFilter, :displayDateBarSeparator, :displayExactValues, :displayLegendDots, :displayLegendValues, :displayRangeSelector, :displayZoomButtons, :fill, :highlightDot, :legendPosition, :max, :min, :numberFormats, :scaleColumns, :scaleType, :thickness, :wmode, :zoomEndTime, :zoomStartTime
     
     # Graph data
-    attr_accessor  :data_labels, :data, :data_methods, :date_method, :data_series
+    attr_accessor :data, :data_label, :date_method, :data_series, :data_table
     
     def initialize(args={}) #:nodoc:
 
@@ -61,7 +61,7 @@ module Seer
       @width  ||= args[:chart_options][:width] || DEFAULT_WIDTH
 
       @data_table = []
-      
+      @data_series = data_series.flatten
     end
         #   data.addColumn('date', 'Date');
         # data.addColumn('number', 'Sold Pencils');
@@ -77,29 +77,38 @@ module Seer
       # date (and not datetime) then the smallest time resolution on the
       # X axis will be one day.
       _data_columns =  "           data.addColumn('date', 'Date');\r"
-      data_labels.each_with_index do |label, i|
-        _data_columns << "           data.addColumn('number', '#{label}');\r"
-        _data_columns << "           data.addColumn('string', 'title#{i}');\r"
-        _data_columns << "           data.addColumn('string', 'text#{i}');\r"
+      data.each_with_index do |d, i|
+        _data_columns << "           data.addColumn('number', '#{d.send(data_label)}');\r"
+        _data_columns << "           data.addColumn('string', 'text#{i+1}');\r"
+        _data_columns << "           data.addColumn('string', 'title#{i+1}');\r"
       end
       _data_columns
     end
     
+    
     def data_table #:nodoc:
-      _rows = data_series.first.map{|d| d.send(date_method)}.uniq
-      _data_rows = []
-      @data_table << "data.addRows([\r"
-      data_series.each do |serie|
-        serie.each do |row|
-          date = row.send(date_method).to_date
-          number = row.send(data_methods.first)
-          _data_rows << "[new Date(#{date.year}, #{date.month} ,#{date.day}), #{number}, undefined, undefined]"
+      _rows          = []
+      @data_table << "           data.addRows([\r"
+      series_by_date = @data_series.group_by(&date_method.to_sym)
+      series_by_date.each do |date, tweets|
+        # Getting the date in JS
+        date         = date.to_date
+        date_part    = ["new Date(#{date.year}, #{date.month} ,#{date.day})"]
+
+        # Getting the quantities
+        ids          = @data.map{ |d| d.id}
+        quantities   = []
+        ids.each do |id|
+          q          = tweets.select{ |ts| ts.user_id == id}.size
+          quantities << "#{q}, undefined, undefined"
         end
-      end
+        _rows << "               [" + (date_part + quantities).join(",") + "]"
+      end 
       
-      @data_table << _data_rows.map().join(",\r")
+      @data_table << _rows.join(",\r")
       @data_table << "]);"
     end
+
 
     def nonstring_options #:nodoc:
       [:allowHtml, :allowRedraw, :annotationsWidth, :colors, :displayAnnotations, :displayAnnotationsFilter, :displayDateBarSeparator, :displayExactValues, :displayLegendDots, :displayLegendValues, :displayRangeSelector, :displayZoomButtons, :fill, :max, :min, :scaleColumns, :thickness, :zoomEndTime, :zoomStartTime]
@@ -128,14 +137,12 @@ module Seer
         </script>
       }
     end
-      
+
     def self.render(data, args) #:nodoc:
       graph = Seer::AnnotatedTimeLineChart.new(
         :data => data,
-        :series_label   => args[:series][:series_label],
-        :data_labels    => args[:series][:data_labels],
+        :data_label    => args[:series][:data_label],
         :date_method     => args[:series][:date_method],
-        :data_methods    => args[:series][:data_methods],
         :data_series    => args[:series][:data_series],
         :chart_options  => args[:chart_options],
         :chart_element  => args[:in_element] || 'chart'
