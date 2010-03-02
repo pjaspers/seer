@@ -61,7 +61,7 @@ module Seer
       @width  ||= args[:chart_options][:width] || DEFAULT_WIDTH
 
       @data_table = []
-      @data_series = data_series.flatten
+      @data_series = data_series
     end
         #   data.addColumn('date', 'Date');
         # data.addColumn('number', 'Sold Pencils');
@@ -89,17 +89,23 @@ module Seer
     def data_table #:nodoc:
       _rows          = []
       @data_table << "           data.addRows([\r"
-      series_by_date = @data_series.group_by(&date_method.to_sym)
-      series_by_date.each do |date, tweets|
+
+      if @data_series.first.respond_to?(date_method.to_sym)
+        @data_series = @data_series.group_by(&date_method.to_sym)
+      else
+        @data_series = @data_series.flatten.group_by(&date_method.to_sym)
+      end
+
+      @data_series.each do |date, tweets|
         # Getting the date in JS
-        date         = date.to_date
+        date         = date.to_s.to_date rescue Time.at(Integer(date)).to_date
         date_part    = ["new Date(#{date.year}, #{date.month} ,#{date.day})"]
 
         # Getting the quantities
-        ids          = @data.map{ |d| d.id}
+        ids          = @data.map{ |d| d.user_id}
         quantities   = []
         ids.each do |id|
-          q          = tweets.select{ |ts| ts.user_id == id}.size
+          q = tweets.select{ |ts| ts.user_id == id}.size
           quantities << "#{q}, undefined, undefined"
         end
         _rows << "               [" + (date_part + quantities).join(",") + "]"
