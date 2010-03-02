@@ -8,6 +8,7 @@ module Seer
   require 'seer/line_chart'
   require 'seer/pie_chart'
   require 'seer/annotated_time_line_chart'
+  require 'seer/motion_chart'
   
   VISUALIZERS = [:area_chart, :bar_chart, :column_chart, :gauge,:annotated_time_line_chart, :line_chart, :pie_chart]
   
@@ -34,6 +35,9 @@ module Seer
   
   def self.area_chart(data, args)
     AreaChart.render(data, args)
+  end
+  def self.motion_chart(data, args)
+    MotionChart.render(data, args)
   end
   
   def self.bar_chart(data, args)

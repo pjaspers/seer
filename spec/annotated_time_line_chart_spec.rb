@@ -1,10 +1,12 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-describe "Seer::AnnotatedTimeLine" do
+describe "Seer::AnnotatedTimeLineChart" do
   
   before :each do
-    
-    @chart = Seer::AnnotatedTimeLine.new(
+    class Data
+          attr_accessor :date, :quantity, :id
+    end
+    @chart = Seer::AnnotatedTimeLineChart.new(
         :data => ["Koala","10to1"],
         :data_label   => 'to_s',
         :data_series => [[Time.utc(1983,"nov",26,20,15,1),3, "Koala"],[Time.utc(1983,"nov",26,20,15,1),8,"10to1"]],
@@ -23,8 +25,7 @@ describe "Seer::AnnotatedTimeLine" do
   end
 
   describe 'graph options' do
-  
-    [:axis_color, :axis_background_color, :axis_font_size, :background_color, :border_color, :colors, :enable_tooltip, :focus_border_color, :height, :legend, :legend_background_color, :legend_font_size, :legend_text_color, :line_size, :log_scale, :max, :min, :point_size, :reverse_axis, :show_categories, :smooth_line, :title, :title_x, :title_y, :title_color, :title_font_size, :tooltip_font_size, :tooltip_height, :number, :tooltip_width, :width].each do |accessor|
+    [:allowHtml, :allowRedraw, :allowRedraw, :allValuesSuffix, :annotationsWidth, :colors, :dateFormat, :displayAnnotations, :displayAnnotationsFilter, :displayDateBarSeparator, :displayExactValues, :displayLegendDots, :displayLegendValues, :displayRangeSelector, :displayZoomButtons, :fill, :highlightDot, :legendPosition, :max, :min, :numberFormats, :scaleColumns, :scaleType, :thickness, :wmode, :zoomEndTime, :zoomStartTime].each do |accessor|
       it "sets its #{accessor} value" do
         @chart.send("#{accessor}=", 'foo')
         @chart.send(accessor).should == 'foo'
