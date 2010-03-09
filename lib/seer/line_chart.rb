@@ -66,7 +66,11 @@ module Seer
     end
   
     def data_columns  #:nodoc:
-      _data_columns =  "            data.addRows(#{data_series.first.map{|d| d.send(data_label)}.uniq.size});\r"
+      # find the longest word
+      longest_array  = data_series.inject do |a,b|
+         a.uniq.size > b.uniq.size ? a : b
+      end
+      _data_columns =  "            data.addRows(#{longest_array.uniq.size});\r"
       _data_columns << "            data.addColumn('string', 'Date');\r"
       data.each do |datum|
         _data_columns << "            data.addColumn('number', '#{datum.send(series_label)}');\r"
@@ -107,7 +111,7 @@ module Seer
 #{data_table.to_s}
             var options = {};
 #{options}
-            var container = document.getElementById('chart');
+            var container = document.getElementById('#{chart_element}');
             var chart = new google.visualization.LineChart(container);
             chart.draw(data, options);
           }

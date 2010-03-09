@@ -1,7 +1,7 @@
 module Seer
 
   # =USAGE
-  # 
+  #
   # In your controller:
   #
   #   @data = Widgets.all # Must be an array, and must respond
@@ -14,16 +14,16 @@ module Seer
   #   <div id="chart" class="chart"></div>
   #
   #   <%= Seer::visualize(
-  #         @data, 
+  #         @data,
   #         :as => :area_chart,
   #         :in_element => 'chart',
   #         :series => {
-  #     
+  #
   #           :data_label => 'date',
   #           :data_method => 'quantity',
   #           :data_series => @series
   #         },
-  #         :chart_options => { 
+  #         :chart_options => {
   #           :height => 300,
   #           :width => 300,
   #           :axis_font_size => 11,
@@ -34,19 +34,19 @@ module Seer
   #        )
   #    -%>
   #
-  # For details on the chart options, see the Google API docs at 
+  # For details on the chart options, see the Google API docs at
   # http://code.google.com/apis/visualization/documentation/gallery/annotatedtimeline.html
   #
   class AnnotatedTimeLineChart
-  
+
     include Seer::Chart
-    
+
     # Graph options
     attr_accessor :allowHtml, :allowRedraw, :allowRedraw, :allValuesSuffix, :annotationsWidth, :colors, :dateFormat, :displayAnnotations, :displayAnnotationsFilter, :displayDateBarSeparator, :displayExactValues, :displayLegendDots, :displayLegendValues, :displayRangeSelector, :displayZoomButtons, :fill, :highlightDot, :legendPosition, :max, :min, :numberFormats, :scaleColumns, :scaleType, :thickness, :wmode, :zoomEndTime, :zoomStartTime
-    
+
     # Graph data
-    attr_accessor :data, :data_label, :date_method, :data_series, :data_table
-    
+    attr_accessor :data, :data_label, :date_method, :data_series, :data_table, :sort_method
+
     def initialize(args={}) #:nodoc:
 
       # Standard options
@@ -55,7 +55,7 @@ module Seer
       # Chart options
       args[:chart_options].each{ |method, arg| self.send("#{method}=",arg) if self.respond_to?(method) }
 
-      # Handle defaults      
+      # Handle defaults
       @colors ||= args[:chart_options][:colors] || DEFAULT_COLORS
       @height ||= args[:chart_options][:height] || DEFAULT_HEIGHT
       @width  ||= args[:chart_options][:width] || DEFAULT_WIDTH
@@ -84,8 +84,8 @@ module Seer
       end
       _data_columns
     end
-    
-    
+
+
     def data_table #:nodoc:
       _rows          = []
       @data_table << "           data.addRows([\r"
@@ -102,15 +102,15 @@ module Seer
         date_part    = ["new Date(#{date.year}, #{date.month} ,#{date.day})"]
 
         # Getting the quantities
-        ids          = @data.map{ |d| d.user_id}
+        ids          = @data.map{ |d| d.send(sort_method)}
         quantities   = []
         ids.each do |id|
-          q = tweets.select{ |ts| ts.user_id == id}.size
+          q = tweets.select{ |ts| ts.send(sort_method) == id}.size
           quantities << "#{q}, undefined, undefined"
         end
         _rows << "               [" + (date_part + quantities).join(",") + "]"
-      end 
-      
+      end
+
       @data_table << _rows.join(",\r")
       @data_table << "]);"
     end
@@ -119,11 +119,11 @@ module Seer
     def nonstring_options #:nodoc:
       [:allowHtml, :allowRedraw, :annotationsWidth, :colors, :displayAnnotations, :displayAnnotationsFilter, :displayDateBarSeparator, :displayExactValues, :displayLegendDots, :displayLegendValues, :displayRangeSelector, :displayZoomButtons, :fill, :max, :min, :scaleColumns, :thickness, :zoomEndTime, :zoomStartTime]
     end
-    
+
     def string_options #:nodoc:
       [:allValuesSuffix, :dateFormat, :highlightDot, :legendPosition, :numberFormats, :scaleType, :wmode]
     end
-    
+
     def to_js #:nodoc:
 
       %{
@@ -136,7 +136,7 @@ module Seer
 #{data_table.to_s}
             var options = {};
 #{options}
-            var container = document.getElementById('chart');
+            var container = document.getElementById('#{chart_element}');
             var chart = new google.visualization.AnnotatedTimeLine(container);
             chart.draw(data, options);
           }
@@ -149,13 +149,14 @@ module Seer
         :data => data,
         :data_label    => args[:series][:data_label],
         :date_method     => args[:series][:date_method],
+        :sort_method     => args[:series][:sort_method] || 'user_id',
         :data_series    => args[:series][:data_series],
         :chart_options  => args[:chart_options],
         :chart_element  => args[:in_element] || 'chart'
       )
       graph.to_js
     end
-    
-  end  
+
+  end
 
 end
