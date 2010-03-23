@@ -11,7 +11,7 @@ module Seer
   #
   # In your view:
   #
-  #   <div id="chart" class="chart"></div>
+  #   <div id="chart"></div>
   #
   #   <%= Seer::visualize(
   #         @data, 
@@ -79,7 +79,7 @@ module Seer
     end
     
     def data_table  #:nodoc:
-      _rows = data_series.first.map{|d| d.send(data_label)}.uniq
+      _rows = data_rows
       _rows.each_with_index do |r,i|
         @data_table << "            data.setCell(#{i}, 0,'#{r}');\r"
       end
@@ -89,6 +89,12 @@ module Seer
         end
       end
       @data_table
+    end
+    
+    def data_rows
+      data_series.inject([]) do |rows, element|
+        rows |= element.map { |e| e.send(data_label) }
+      end
     end
 
     def nonstring_options  #:nodoc:
@@ -111,7 +117,7 @@ module Seer
 #{data_table.to_s}
             var options = {};
 #{options}
-            var container = document.getElementById('#{chart_element}');
+            var container = document.getElementById('#{self.chart_element}');
             var chart = new google.visualization.LineChart(container);
             chart.draw(data, options);
           }
