@@ -45,7 +45,7 @@ module Seer
     attr_accessor :allowHtml, :allowRedraw, :allowRedraw, :allValuesSuffix, :annotationsWidth, :colors, :dateFormat, :displayAnnotations, :displayAnnotationsFilter, :displayDateBarSeparator, :displayExactValues, :displayLegendDots, :displayLegendValues, :displayRangeSelector, :displayZoomButtons, :fill, :highlightDot, :legendPosition, :max, :min, :numberFormats, :scaleColumns, :scaleType, :thickness, :wmode, :zoomEndTime, :zoomStartTime
 
     # Graph data
-    attr_accessor :data, :data_label, :date_method, :data_series, :data_table, :sort_method
+    attr_accessor :data, :data_label, :date_method, :data_series, :data_table, :sort_method, :quantity_method
 
     def initialize(args={}) #:nodoc:
 
@@ -96,7 +96,7 @@ module Seer
         @data_series = @data_series.flatten.group_by(&date_method.to_sym)
       end
 
-      @data_series.each do |date, tweets|
+      @data_series.each do |date, _data|
         # Getting the date in JS
         date         = date.to_s.to_date rescue Time.at(Integer(date)).to_date
         date_part    = ["new Date(#{date.year}, #{date.month} ,#{date.day})"]
@@ -105,7 +105,16 @@ module Seer
         ids          = @data.map{ |d| d.send(sort_method)}
         quantities   = []
         ids.each do |id|
-          q = tweets.select{ |ts| ts.send(sort_method) == id}.size
+          puts id
+          sorted = _data.select{ |ts| ts.send(sort_method) == id}
+          q = 0
+          unless sorted.empty?
+            if sorted.first.respond_to?(quantity_method.to_sym)
+              q = sorted.first.send(quantity_method.to_sym)
+            else
+              q = sorted.send(quantity_method.to_sym)
+            end
+          end
           quantities << "#{q}, undefined, undefined"
         end
         _rows << "               [" + (date_part + quantities).join(",") + "]"
@@ -149,6 +158,7 @@ module Seer
         :data => data,
         :data_label    => args[:series][:data_label],
         :date_method     => args[:series][:date_method],
+        :quantity_method => args[:series][:quantity_method],
         :sort_method     => args[:series][:sort_method] || 'user_id',
         :data_series    => args[:series][:data_series],
         :chart_options  => args[:chart_options],
