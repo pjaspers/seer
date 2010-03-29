@@ -42,7 +42,7 @@ module Seer
     include Seer::Chart
 
     # Graph options
-    attr_accessor :allowHtml, :allowRedraw, :allowRedraw, :allValuesSuffix, :annotationsWidth, :colors, :dateFormat, :displayAnnotations, :displayAnnotationsFilter, :displayDateBarSeparator, :displayExactValues, :displayLegendDots, :displayLegendValues, :displayRangeSelector, :displayZoomButtons, :fill, :highlightDot, :legendPosition, :max, :min, :numberFormats, :scaleColumns, :scaleType, :thickness, :wmode, :zoomEndTime, :zoomStartTime
+    attr_accessor :allowHtml, :allowRedraw, :allowRedraw, :allValuesSuffix, :annotationsWidth, :dateFormat, :displayAnnotations, :displayAnnotationsFilter, :displayDateBarSeparator, :displayExactValues, :displayLegendDots, :displayLegendValues, :displayRangeSelector, :displayZoomButtons, :fill, :highlightDot, :legendPosition, :max, :min, :numberFormats, :scaleColumns, :scaleType, :thickness, :wmode, :zoomEndTime, :zoomStartTime, :height, :width
 
     # Graph data
     attr_accessor :data, :data_label, :date_method, :data_series, :data_table, :sort_method, :quantity_method
@@ -57,11 +57,17 @@ module Seer
 
       # Handle defaults
       @colors ||= args[:chart_options][:colors] || DEFAULT_COLORS
-      @height ||= args[:chart_options][:height] || DEFAULT_HEIGHT
-      @width  ||= args[:chart_options][:width] || DEFAULT_WIDTH
 
       @data_table = []
       @data_series = data_series
+    end
+
+    def height=
+        raise ArgumentError, "You must set height explicitly on the div element."
+    end
+
+    def width=
+        raise ArgumentError, "You must set width explicitly on the div element."
     end
         #   data.addColumn('date', 'Date');
         # data.addColumn('number', 'Sold Pencils');

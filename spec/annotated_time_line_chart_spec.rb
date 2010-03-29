@@ -31,20 +31,34 @@ describe "Seer::AnnotatedTimeLineChart" do
   end
 
   describe 'defaults' do
-
     it 'colors' do
       @chart.colors.should == Seer::Chart::DEFAULT_COLORS
     end
 
+    it 'height' do
+      lambda {
+        @chart.height = 100
+      }.should raise_error(ArgumentError)
+    end
+
+    it 'width' do
+      lambda {
+        @chart.width = 100
+      }.should raise_error(ArgumentError)
+    end
+    # We can't do this because it doesn't use the same defaults
+    # it_should_behave_like 'it sets default values'
   end
 
   describe 'graph options' do
-    [:allowHtml, :allowRedraw, :allowRedraw, :allValuesSuffix, :annotationsWidth, :colors, :dateFormat, :displayAnnotations, :displayAnnotationsFilter, :displayDateBarSeparator, :displayExactValues, :displayLegendDots, :displayLegendValues, :displayRangeSelector, :displayZoomButtons, :fill, :highlightDot, :legendPosition, :max, :min, :numberFormats, :scaleColumns, :scaleType, :thickness, :wmode, :zoomEndTime, :zoomStartTime].each do |accessor|
+    [:allowHtml, :allowRedraw, :allowRedraw, :allValuesSuffix, :annotationsWidth, :dateFormat, :displayAnnotations, :displayAnnotationsFilter, :displayDateBarSeparator, :displayExactValues, :displayLegendDots, :displayLegendValues, :displayRangeSelector, :displayZoomButtons, :fill, :highlightDot, :legendPosition, :max, :min, :numberFormats, :scaleColumns, :scaleType, :thickness, :wmode, :zoomEndTime, :zoomStartTime].each do |accessor|
       it "sets its #{accessor} value" do
         @chart.send("#{accessor}=", 'foo')
         @chart.send(accessor).should == 'foo'
       end
     end
+
+    it_should_behave_like 'it has colors attribute'
   end
 
   it 'renders as JavaScript' do
