@@ -88,7 +88,7 @@ module Seer
 
     def data_table #:nodoc:
       _rows          = []
-      @data_table << "           data.addRows([\r"
+      _rows << "           data.addRows([\r"
 
       if @data_series.first.respond_to?(date_method.to_sym)
         @data_series = @data_series.group_by(&date_method.to_sym)
@@ -105,7 +105,6 @@ module Seer
         ids          = @data.map{ |d| d.send(sort_method)}
         quantities   = []
         ids.each do |id|
-          puts id
           sorted = _data.select{ |ts| ts.send(sort_method) == id}
           q = 0
           unless sorted.empty?
@@ -120,8 +119,10 @@ module Seer
         _rows << "               [" + (date_part + quantities).join(",") + "]"
       end
 
-      @data_table << _rows.join(",\r")
-      @data_table << "]);"
+
+      _rows << "]);"
+      _rows.join(",\r")
+      _rows.to_s
     end
 
 
@@ -142,7 +143,7 @@ module Seer
           function drawChart() {
             var data = new google.visualization.DataTable();
 #{data_columns}
-#{data_table.to_s}
+#{data_table}
             var options = {};
 #{options}
             var container = document.getElementById('#{chart_element}');
@@ -169,4 +170,10 @@ module Seer
 
   end
 
+end
+
+class Array
+  def second
+    at(1)
+  end
 end
