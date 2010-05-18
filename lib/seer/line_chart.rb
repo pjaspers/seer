@@ -72,8 +72,10 @@ module Seer
       end
       _data_columns =  "            data.addRows(#{longest_array.uniq.size});\r"
       _data_columns << "            data.addColumn('string', 'Date');\r"
-      data.each do |datum|
-        _data_columns << "            data.addColumn('number', '#{datum.send(series_label)}');\r"
+      if data.first.respond_to?(series_label)
+        data.each{ |datum| _data_columns << "            data.addColumn('number', '#{datum.send(series_label)}');\r" }
+      else
+        data.each{ |datum| _data_columns << "            data.addColumn('number', '#{series_label}');\r" }
       end
       _data_columns
     end
