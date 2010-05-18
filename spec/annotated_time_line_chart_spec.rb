@@ -95,20 +95,21 @@ describe "Seer::AnnotatedTimeLineChart" do
   end
 
   it 'sets its data table' do
-    @koala.should_receive(:sortable_id).once.and_return("1")
-    @tentoone.should_receive(:sortable_id).once.and_return("2")
+    @koala.should_receive(:sortable_id).twice.and_return("1")
+    @tentoone.should_receive(:sortable_id).twice.and_return("2")
 
     @data_1.should_receive(:datum).once.and_return(Time.utc(1983,"nov",26,20,15,1))
     @data_1.should_receive(:quantity).once.and_return(3)
     @data_1.should_receive(:sortable_id).twice.and_return("1")
 
-    @data_2.should_receive(:datum).and_return(Time.utc(1983,"nov",26,20,15,1))
+    @data_2.should_receive(:datum).and_return(Time.utc(1983,"nov",27,20,15,1))
     @data_2.should_receive(:quantity).and_return(8)
     @data_2.should_receive(:sortable_id).twice.and_return("2")
 
     data_table = @chart.data_table.to_s
     data_table.should =~ /addRows\(\[/
-    data_table.should =~ /\[new Date\(1983, 11 ,26\),3, undefined, undefined,8, undefined, undefined\]/
+    data_table.should =~ /\[new Date\(1983, 11 ,26\),3, undefined, undefined,0, undefined, undefined\],/
+    data_table.should =~ /\[new Date\(1983, 11 ,27\),0, undefined, undefined,8, undefined, undefined\]/
     data_table.should =~ /\]\);/
   end
 

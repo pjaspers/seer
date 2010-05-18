@@ -93,8 +93,7 @@ module Seer
 
 
     def data_table #:nodoc:
-      _rows          = []
-      _rows << "           data.addRows([\r"
+      rows          = "    data.addRows([\r"
 
       if @data_series.first.respond_to?(date_method.to_sym)
         @data_series = @data_series.group_by(&date_method.to_sym)
@@ -102,6 +101,7 @@ module Seer
         @data_series = @data_series.flatten.group_by(&date_method.to_sym)
       end
 
+      _rows = []
       @data_series.each do |date, _data|
         # Getting the date in JS
         date         = date.to_s.to_date rescue Time.at(Integer(date)).to_date
@@ -122,13 +122,12 @@ module Seer
           end
           quantities << "#{q}, undefined, undefined"
         end
-        _rows << "               [" + (date_part + quantities).join(",") + "]"
+        _rows << "      [" + (date_part + quantities).join(",") + "]" if date_part
       end
 
-
-      _rows << "]);"
-      _rows.join(",\r")
-      _rows.to_s
+      rows << _rows.join(", \r")
+      rows << "]);"
+      rows
     end
 
 
