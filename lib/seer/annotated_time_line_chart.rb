@@ -45,7 +45,7 @@ module Seer
     attr_accessor :allowHtml, :allowRedraw, :allowRedraw, :allValuesSuffix, :annotationsWidth, :dateFormat, :displayAnnotations, :displayAnnotationsFilter, :displayDateBarSeparator, :displayExactValues, :displayLegendDots, :displayLegendValues, :displayRangeSelector, :displayZoomButtons, :fill, :highlightDot, :legendPosition, :max, :min, :numberFormats, :scaleColumns, :scaleType, :thickness, :wmode, :zoomEndTime, :zoomStartTime, :height, :width
 
     # Graph data
-    attr_accessor :data, :data_label, :date_method, :data_series, :data_table, :sort_method, :quantity_method
+    attr_accessor :data, :data_label, :date_method, :data_series, :data_table, :data_annotations, :sort_method, :quantity_method
 
     def initialize(args={}) #:nodoc:
 
@@ -60,6 +60,7 @@ module Seer
 
       @data_table = []
       @data_series = data_series
+      @annotations = data_annotations || []
     end
 
     def height=
@@ -120,7 +121,12 @@ module Seer
               q = sorted.send(quantity_method.to_sym)
             end
           end
-          quantities << "#{q}, undefined, undefined"
+          if annotation = annotation_for_date_and_id(date, id)
+            quantities << "#{q}, '#{annotation.title}', '#{annotation.description}'"
+          else
+            quantities << "#{q}, undefined, undefined"
+          end
+
         end
         _rows << "      [" + (date_part + quantities).join(",") + "]" if date_part
       end
@@ -130,6 +136,13 @@ module Seer
       rows
     end
 
+    def annotation_for_date_and_id date, id
+      annotations = Array.new(@annotations)
+      annotations.delete_if do |a|
+        a.send(date_method).to_s.to_date != date || a.send(sort_method) != id
+      end
+      annotations.first
+    end
 
     def nonstring_options #:nodoc:
       [:allowHtml, :allowRedraw, :annotationsWidth, :colors, :displayAnnotations, :displayAnnotationsFilter, :displayDateBarSeparator, :displayExactValues, :displayLegendDots, :displayLegendValues, :displayRangeSelector, :displayZoomButtons, :fill, :max, :min, :scaleColumns, :thickness, :zoomEndTime, :zoomStartTime]
@@ -160,16 +173,18 @@ module Seer
     end
 
     def self.render(data, args) #:nodoc:
-      graph = Seer::AnnotatedTimeLineChart.new(
-        :data => data,
-        :data_label    => args[:series][:data_label],
-        :date_method     => args[:series][:date_method],
-        :quantity_method => args[:series][:quantity_method],
-        :sort_method     => args[:series][:sort_method] || 'user_id',
-        :data_series    => args[:series][:data_series],
-        :chart_options  => args[:chart_options],
-        :chart_element  => args[:in_element] || 'chart'
-      )
+      graph = Seer::AnnotatedTimeLineChart.
+        new(
+            :data => data,
+            :data_label    => args[:series][:data_label],
+            :date_method     => args[:series][:date_method],
+            :quantity_method => args[:series][:quantity_method],
+            :sort_method     => args[:series][:sort_method] || 'user_id',
+            :data_series    => args[:series][:data_series],
+            :data_annotations => args[:series][:annotations],
+            :chart_options  => args[:chart_options],
+            :chart_element  => args[:in_element] || 'chart'
+            )
       graph.to_js
     end
 
