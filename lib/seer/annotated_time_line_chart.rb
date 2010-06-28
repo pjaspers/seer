@@ -48,6 +48,7 @@ module Seer
     attr_accessor :data, :data_label, :date_method, :data_series, :data_table, :data_annotations, :sort_method, :quantity_method
 
     def initialize(args={}) #:nodoc:
+      # setup_logger
 
       # Standard options
       args.each{ |method,arg| self.send("#{method}=",arg) if self.respond_to?(method) }
@@ -57,10 +58,17 @@ module Seer
 
       # Handle defaults
       @colors ||= args[:chart_options][:colors] || DEFAULT_COLORS
-
       @data_table = []
       @data_series = data_series
       @annotations = data_annotations || []
+    end
+
+    # A handy way to set up a logger.
+    def setup_logger
+      logfile = File.open('/Users/junkiesxl/seer.log', 'a')
+      logfile.sync = true
+      @logger = Logger.new(logfile)
+      @logger.info "Intialized."
     end
 
     def height=
