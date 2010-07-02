@@ -93,13 +93,20 @@ module Seer
       # X axis will be one day.
       _data_columns =  "           data.addColumn('date', 'Date');\r"
       data.each_with_index do |d, i|
-        _data_columns << "           data.addColumn('number', '#{d.send(data_label)}');\r"
+        _data_columns << "           data.addColumn('number', '#{escape_javascript(d.send(data_label))}');\r"
         _data_columns << "           data.addColumn('string', 'text#{i+1}');\r"
         _data_columns << "           data.addColumn('string', 'title#{i+1}');\r"
       end
       _data_columns
     end
 
+    def date_from_time time
+      Date.new(time.year, time.month, time.day)
+    end
+
+    def get_date_from_date date
+        date.to_s.to_date rescue date_from_time(Time.at(Integer(date)))
+    end
 
     def data_table #:nodoc:
       rows          = "    data.addRows([\r"
@@ -113,7 +120,7 @@ module Seer
       _rows = []
       @data_series.each do |date, _data|
         # Getting the date in JS
-        date         = date.to_s.to_date rescue Time.at(Integer(date)).to_date
+        date         = get_date_from_date(date)
         date_part    = ["new Date(#{date.year}, #{date.month} ,#{date.day})"]
 
         # Getting the quantities
@@ -130,9 +137,9 @@ module Seer
             end
           end
           if annotation = annotation_for_date_and_id(date, id)
-            quantities << "#{q}, '#{annotation.title}', '#{annotation.description}'"
+            quantities << "#{q}, '#{escape_javascript(annotation.title)}', '#{escape_javascript(annotation.description)}'"
           else
-            quantities << "#{q}, undefined, undefined"
+            quantities << "#{escape_javascript(q.to_s)}, undefined, undefined"
           end
 
         end
@@ -147,7 +154,8 @@ module Seer
     def annotation_for_date_and_id date, id
       annotations = Array.new(@annotations)
       annotations.delete_if do |a|
-        a.send(date_method).to_s.to_date != date || a.send(sort_method) != id
+        annotation_date = get_date_from_date(a.send(date_method))
+        annotation_date != date || a.send(sort_method) != id
       end
       annotations.first
     end

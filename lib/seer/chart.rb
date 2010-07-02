@@ -3,16 +3,16 @@ module Seer
   module Chart #:nodoc:
 
     attr_accessor :chart_element, :colors
-    
+
     DEFAULT_COLORS = ['#324F69','#919E4B', '#A34D4D', '#BEC8BE']
     DEFAULT_LEGEND_LOCATION = 'bottom'
     DEFAULT_HEIGHT = 350
     DEFAULT_WIDTH = 550
-    
+
     def in_element=(elem)
       @chart_element = elem
     end
-    
+
     def colors=(colors_list)
       unless colors_list.include?('darker')
         raise ArgumentError, "Invalid color option: #{colors_list}" unless colors_list.is_a?(Array)
@@ -22,7 +22,21 @@ module Seer
       end
       @colors = colors_list
     end
-    
+
+
+    def escape_single_quotes(string)
+      string.gsub(/'/, "\\\\'")
+    end
+
+    def escape_javascript(javascript)
+      js_escape_map = { '\\' => '\\\\', '</' => '<\/', "\r\n" => '\n', "\n" => '\n', "\r" => '\n', '"' => '\\"', "'" => "\\'" }
+      if javascript
+        javascript.gsub(/(\\|<\/|\r\n|[\n\r"'])/) { js_escape_map[$1] }
+      else
+        ''
+      end
+    end
+
     def formatted_colors
       if @colors.include?('darker')
         @colors
@@ -30,14 +44,14 @@ module Seer
         "[#{@colors.map{|color| "'#{color.gsub(/\#/,'')}'"} * ','}]"
       end
     end
-    
+
     def data_columns
       _data_columns =  "            data.addRows(#{data_table.size});\r"
       _data_columns << "            data.addColumn('string', '#{label_method}');\r"
       _data_columns << "            data.addColumn('number', '#{data_method}');\r"
       _data_columns
     end
-    
+
     def options
       _options = ""
       nonstring_options.each do |opt|
@@ -54,7 +68,7 @@ module Seer
       end
       _options
     end
-        
+
   end
 
 end

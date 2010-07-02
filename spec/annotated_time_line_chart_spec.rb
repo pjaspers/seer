@@ -2,7 +2,8 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 time_one = Time.utc(1983,"nov",26,20,15,1)
 time_two = Time.utc(1983,"nov",27,20,15,1)
-title_one = "A koala event"
+title_one = "A koala's event"
+title_one_escaped = "A koala\\\\'s event"
 desc_one = "An elaborate description"
 title_two = "A 10to1 Event"
 desc_two = "A smaller yet even longer description"
@@ -143,7 +144,7 @@ describe "Seer::AnnotatedTimeLineChart" do
 
     data_table = @chart.data_table.to_s
     data_table.should =~ /addRows\(\[/
-    data_table.should =~ /\[new Date\(1983, 11 ,26\),3, '#{title_one}', '#{desc_one}',0, undefined, undefined\],/
+    data_table.should =~ /\[new Date\(1983, 11 ,26\),3, '#{title_one_escaped}', '#{desc_one}',0, undefined, undefined\],/
     data_table.should =~ /\[new Date\(1983, 11 ,27\),0, undefined, undefined,8, '#{title_two}', '#{desc_two}'\]/
     data_table.should =~ /\]\);/
   end
