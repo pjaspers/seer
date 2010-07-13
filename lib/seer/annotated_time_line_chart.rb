@@ -121,7 +121,7 @@ module Seer
       @data_series.each do |date, _data|
         # Getting the date in JS
         date         = get_date_from_date(date)
-        date_part    = ["new Date(#{date.year}, #{date.month} ,#{date.day})"]
+        date_part    = ["new Date(#{date.year}, #{date.month-1} ,#{date.day})"]
 
         # Getting the quantities
         ids          = @data.map{ |d| d.send(sort_method)}

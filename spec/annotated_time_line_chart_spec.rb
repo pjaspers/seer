@@ -144,8 +144,8 @@ describe "Seer::AnnotatedTimeLineChart" do
 
     data_table = @chart.data_table.to_s
     data_table.should =~ /addRows\(\[/
-    data_table.should =~ /\[new Date\(1983, 11 ,26\),3, '#{title_one_escaped}', '#{desc_one}',0, undefined, undefined\],/
-    data_table.should =~ /\[new Date\(1983, 11 ,27\),0, undefined, undefined,8, '#{title_two}', '#{desc_two}'\]/
+    data_table.should =~ /\[new Date\(1983, 10 ,26\),3, '#{title_one_escaped}', '#{desc_one}',0, undefined, undefined\],/
+    data_table.should =~ /\[new Date\(1983, 10 ,27\),0, undefined, undefined,8, '#{title_two}', '#{desc_two}'\]/
     data_table.should =~ /\]\);/
   end
 

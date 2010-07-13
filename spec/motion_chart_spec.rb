@@ -48,9 +48,9 @@ describe "Seer::MotionChart" do
   
   it 'sets its data table' do
     @chart.data_table.to_s.should =~ /addRows\(\[\)/
-    @chart.data_table.to_s.should =~ /\['Kid',new Date \(1983,11,26\),1,10\]/
-    @chart.data_table.to_s.should =~ /\['Koala',new Date \(1983,11,26\),3,30\]/
-    @chart.data_table.to_s.should =~ /\['10to1',new Date \(1983,11,26\),8,80\]/
+    @chart.data_table.to_s.should =~ /\['Kid',new Date \(1983,10,26\),1,10\]/
+    @chart.data_table.to_s.should =~ /\['Koala',new Date \(1983,10,26\),3,30\]/
+    @chart.data_table.to_s.should =~ /\['10to1',new Date \(1983,10,26\),8,80\]/
     @chart.data_table.to_s.should =~ /\]\);/
   end
   

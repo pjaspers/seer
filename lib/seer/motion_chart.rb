@@ -96,7 +96,7 @@ module Seer
         serie.each do |date, content|
           # Getting the date in JS
           date         = date.to_date
-          date_part    = ["new Date(#{date.year}, #{date.month} ,#{date.day})"]
+          date_part    = ["new Date(#{date.year}, #{date.month-1} ,#{date.day})"]
 
           # Getting the quantities
           ids          = @data
