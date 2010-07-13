@@ -55,7 +55,7 @@ module Seer
     def options
       _options = ""
       nonstring_options.each do |opt|
-        next unless self.send(opt)
+        next unless (self.respond_to?(opt) && !self.send(opt).nil?)
         if opt == :colors
           _options << "            options['#{opt.to_s.camelize(:lower)}'] = #{self.send(:formatted_colors)};\r"
         else
