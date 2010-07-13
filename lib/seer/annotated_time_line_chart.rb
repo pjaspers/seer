@@ -137,7 +137,10 @@ module Seer
             end
           end
           if annotation = annotation_for_date_and_id(date, id)
-            quantities << "#{q}, '#{escape_javascript(annotation.title)}', '#{escape_javascript(annotation.description)}'"
+            title = "'#{escape_javascript(annotation.title)}'"
+            description = "'#{escape_javascript(annotation.description)}'"
+            description = 'undefined' if (annotation.title == annotation.description)
+            quantities << "#{q}, #{title}, #{description}"
           else
             quantities << "#{escape_javascript(q.to_s)}, undefined, undefined"
           end
