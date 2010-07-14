@@ -108,6 +108,20 @@ module Seer
         date.to_s.to_date rescue date_from_time(Time.at(Integer(date)))
     end
 
+    def annotations_by_date
+      unless @annotations_by_date
+        @annotations_by_date = { }
+        @annotations.group_by(&date_method.to_sym).each do |timestamp, annotation|
+          date = get_date_from_date(timestamp)
+          unless  @annotations_by_date.has_key?(date)
+            @annotations_by_date[date] = []
+          end
+          @annotations_by_date[date] << annotation
+        end
+      end
+      @annotations_by_date
+    end
+
     def data_table #:nodoc:
       rows          = "    data.addRows([\r"
 
@@ -116,6 +130,8 @@ module Seer
       else
         @data_series = @data_series.flatten.group_by(&date_method.to_sym)
       end
+
+
 
       _rows = []
       @data_series.each do |date, _data|
@@ -155,12 +171,16 @@ module Seer
     end
 
     def annotation_for_date_and_id date, id
-      annotations = Array.new(@annotations)
-      annotations.delete_if do |a|
-        annotation_date = get_date_from_date(a.send(date_method))
-        annotation_date != date || a.send(sort_method) != id
+      annotations_sorted_by_date = annotations_by_date
+      annotation = nil
+      if annotations = annotations_sorted_by_date[date]
+        annotations.flatten.each do |ant|
+          if ant.send(sort_method) == id
+            annotation = ant
+          end
+        end
       end
-      annotations.first
+      annotation
     end
 
     def nonstring_options #:nodoc:
